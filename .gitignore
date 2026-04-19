@@ -1,0 +1,20 @@
+# .NET build output
+bin/
+obj/
+*.user
+*.lscache
+*.suo
+.vs/
+
+# Published executables
+Server/StateSync.Server/publish/
+
+# Unity generated
+Client/Library/
+Client/Temp/
+Client/Logs/
+Client/UserSettings/
+
+# OS
+.DS_Store
+Thumbs.db
