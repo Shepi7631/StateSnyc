@@ -31,7 +31,16 @@ namespace StateSync.Client.Network
 				throw new InvalidOperationException("Already connected");
 
 			_TcpClient = new TcpClient();
-			_TcpClient.Connect(host, port);
+			try
+			{
+				_TcpClient.Connect(host, port);
+			}
+			catch
+			{
+				_TcpClient.Close();
+				_TcpClient = null;
+				throw;
+			}
 			_Stream = _TcpClient.GetStream();
 			_IsRunning = true;
 
@@ -99,6 +108,11 @@ namespace StateSync.Client.Network
 			{
 				if (_IsRunning)
 					Debug.LogWarning("[NetworkClient] Connection lost");
+			}
+			catch (InvalidDataException ex)
+			{
+				if (_IsRunning)
+					Debug.LogWarning("[NetworkClient] Invalid data from server: " + ex.Message);
 			}
 			catch (ObjectDisposedException)
 			{

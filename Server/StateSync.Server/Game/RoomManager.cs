@@ -38,11 +38,13 @@ public class RoomManager
 
     private string GenerateUniqueRoomId()
     {
+        // Random.Shared 是线程安全的静态实例，无需 lock
         for (int i = 0; i < 10; i++)
         {
             var id = Random.Shared.Next(0, 1_000_000).ToString("D6");
             if (!_rooms.ContainsKey(id)) return id;
         }
+        // 10 次碰撞后回退到 GUID 前缀，在百万房间规模内实际上不可能触发
         return Guid.NewGuid().ToString("N")[..6];
     }
 }

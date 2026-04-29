@@ -10,17 +10,18 @@ public class MessageDispatcher
 
     public MessageDispatcher(RoomManager roomManager) => _roomManager = roomManager;
 
-    public byte[] Dispatch(MessageType type, byte[] data) => type switch
+    public (byte[] Buffer, int Length) Dispatch(MessageType type, byte[] data, int dataLength) => type switch
     {
-        MessageType.JoinRoom   => HandleJoinRoom(data),
-        MessageType.CreateRoom => HandleCreateRoom(data),
+        MessageType.JoinRoom   => HandleJoinRoom(data, dataLength),
+        MessageType.CreateRoom => HandleCreateRoom(data, dataLength),
         _ => PacketWriter.WriteServerPacket(type, ErrorCode.InvalidInput, [], [])
     };
 
-    private byte[] HandleJoinRoom(byte[] data)
+    private (byte[] Buffer, int Length) HandleJoinRoom(byte[] data, int dataLength)
     {
         JoinRoom request;
-        try { request = JoinRoom.Parser.ParseFrom(data); }
+        // AsSpan(0, dataLength)：ArrayPool.Rent 可能返回比请求更大的缓冲，必须限定有效范围
+        try { request = JoinRoom.Parser.ParseFrom(data.AsSpan(0, dataLength)); }
         catch (InvalidProtocolBufferException)
         {
             return PacketWriter.WriteServerPacket(MessageType.JoinRoom, ErrorCode.InvalidInput, [], []);
@@ -30,10 +31,11 @@ public class MessageDispatcher
         return PacketWriter.WriteServerPacket(MessageType.JoinRoom, error, errorParams, responseData);
     }
 
-    private byte[] HandleCreateRoom(byte[] data)
+    private (byte[] Buffer, int Length) HandleCreateRoom(byte[] data, int dataLength)
     {
         CreateRoom request;
-        try { request = CreateRoom.Parser.ParseFrom(data); }
+        // AsSpan(0, dataLength)：ArrayPool.Rent 可能返回比请求更大的缓冲，必须限定有效范围
+        try { request = CreateRoom.Parser.ParseFrom(data.AsSpan(0, dataLength)); }
         catch (InvalidProtocolBufferException)
         {
             return PacketWriter.WriteServerPacket(MessageType.CreateRoom, ErrorCode.InvalidInput, [], []);

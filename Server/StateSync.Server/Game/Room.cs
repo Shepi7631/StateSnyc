@@ -13,8 +13,10 @@ public class Room
         MaxPlayers = maxPlayers;
     }
 
+    // 返回快照副本：调用方持有引用期间不阻塞写入，且不会观察到后续加入的玩家
     public IReadOnlyList<string> Players { get { lock (_lock) return [.. _players]; } }
 
+    // lock 保证检查和加入是原子操作，防止两个线程同时通过满员检查
     public bool TryAdd(string playerId)
     {
         lock (_lock)
