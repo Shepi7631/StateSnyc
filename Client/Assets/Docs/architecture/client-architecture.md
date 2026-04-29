@@ -102,30 +102,42 @@ Assets/Scripts/
 │   ├── MessageType.cs              # 消息类型枚举
 │   ├── ErrorCodes.cs               # 错误码枚举
 │   └── Messages.cs                 # Protobuf 消息类
-└── Network/                        # 网络框架（手写）
-    ├── ServerPacket.cs             # 服务端响应包结构体
-    ├── PacketWriter.cs             # 客户端→服务端 编码
-    ├── PacketReader.cs             # 服务端→客户端 解码
-    ├── MessageDispatcher.cs        # 消息分发器
-    ├── NetworkClient.cs            # TCP 连接与收发
-    └── NetworkManager.cs           # MonoBehaviour 单例入口
+├── Network/                        # 网络框架（手写）
+│   ├── ServerPacket.cs             # 服务端响应包结构体
+│   ├── PacketWriter.cs             # 客户端→服务端 编码
+│   ├── PacketReader.cs             # 服务端→客户端 解码
+│   ├── MessageDispatcher.cs        # 消息分发器
+│   ├── NetworkClient.cs            # TCP 连接与收发
+│   └── NetworkManager.cs           # 网络层入口（普通 C# 类）
+└── UI/
+    ├── UIManager.cs                # 协调 NetworkManager + RoomUIController
+    ├── RoomUIBuilder.cs            # 运行时以纯代码构建 Canvas 层级
+    └── RoomUIController.cs         # 面板切换与网络响应处理
 ```
 
 ### 3.2 架构分层
 
 ```
-┌─────────────────────────────────────────────┐
-│              业务层（Game Logic）              │
-│   注册回调 / 发送请求 / 处理响应               │
-└─────────────────────┬───────────────────────┘
-                      │ RegisterHandler / Send
-                      ▼
-┌─────────────────────────────────────────────┐
-│           NetworkManager (MonoBehaviour)      │
-│   单例入口 / 主线程消息泵 / 公开 API           │
-└────────┬──────────────────────┬─────────────┘
-         │                      │
-         ▼                      ▼
+┌──────────────────────────────────────────────────┐
+│           MonoBehaviour（场景入口）                │
+│   Update() → UIManager.Tick() / NetworkManager.Tick()│
+└────────────────────────┬─────────────────────────┘
+                         │
+                         ▼
+┌──────────────────────────────────────────────────┐
+│                   UIManager                       │
+│   协调 NetworkManager + RoomUIController 生命周期  │
+└──────────┬─────────────────────────┬─────────────┘
+           │                         │
+           ▼                         ▼
+┌──────────────────────┐  ┌────────────────────────┐
+│   NetworkManager     │  │   RoomUIController     │
+│   普通 C# 类          │  │   普通 C# 类            │
+│   Initialize/Tick    │  │   Initialize/Tick      │
+│   /Dispose           │  │   /Dispose             │
+└───────┬──────────────┘  └────────────────────────┘
+        │
+        ▼
 ┌─────────────────┐  ┌───────────────────────┐
 │ MessageDispatcher│  │    NetworkClient       │
 │ 类型注册表       │  │ TCP 连接 / 后台线程     │
@@ -208,11 +220,17 @@ _ReceiveThread.Start();
 
 #### NetworkManager
 
-MonoBehaviour 单例，整个网络层的唯一入口。
+普通 C# 类，整个网络层的唯一入口，由外部持有并驱动（无 MonoBehaviour 单例）。
 
-**单例保证：** `Awake` 中检测重复实例并销毁，`DontDestroyOnLoad` 跨场景存活。
+**生命周期：**
 
-**主线程消息泵（Update）：**
+| 方法 | 调用时机 |
+|------|----------|
+| `Initialize()` | 场景启动时，创建 NetworkClient 和 MessageDispatcher |
+| `Tick()` | 每帧由 MonoBehaviour.Update() 调用，排空接收队列 |
+| `Dispose()` | 场景卸载时，断开连接并清理资源 |
+
+**主线程消息泵（Tick）：**
 
 ```
 每帧执行：
@@ -222,38 +240,19 @@ MonoBehaviour 单例，整个网络层的唯一入口。
 
 使用 `while` 而非 `if` 确保一帧内处理完所有积压消息，避免延迟累积。
 
-**断连通知的线程切换：** 后台线程触发 `HandleDisconnected` 仅设标志位 → 主线程 `Update` 检测后触发事件，保证订阅者可安全调用 Unity API。
+**断连通知的线程切换：** 后台线程触发 `HandleDisconnected` 仅设标志位 → 主线程 `Tick` 检测后触发事件，保证订阅者可安全调用 Unity API。
 
 **公开 API：**
 
 | 方法 | 说明 |
 |------|------|
+| `Initialize()` | 初始化内部组件 |
 | `Connect(host, port)` | 建立 TCP 连接，启动后台接收线程 |
 | `Disconnect()` | 关闭连接 |
 | `Send<T>(type, message)` | 序列化并发送 protobuf 消息 |
 | `RegisterHandler<T>(type, handler)` | 注册消息处理回调 |
 | `UnregisterHandler(type)` | 移除回调 |
-
-**使用示例：**
-
-```csharp
-// 注册处理器
-NetworkManager.Instance.RegisterHandler<PlayerJoined>(
-    MessageType.PlayerJoined,
-    (response, error, errorParams) =>
-    {
-        if (error == ErrorCode.Success)
-            Debug.Log("玩家加入: " + response.PlayerId);
-    });
-
-// 连接服务端
-NetworkManager.Instance.Connect("127.0.0.1", 7777);
-
-// 发送创建房间请求
-NetworkManager.Instance.Send(
-    MessageType.CreateRoom,
-    new CreateRoom { MaxPlayers = 4 });
-```
+| `Dispose()` | 释放全部资源 |
 
 ### 3.4 完整数据流
 
@@ -322,12 +321,16 @@ NetworkManager.Instance.Send(
 Assets/Scripts/
 ├── _gen/                           # protobuf 自动生成
 ├── Network/                        # 基础设施层（已实现）
-│   ├── NetworkManager.cs
+│   ├── NetworkManager.cs           # 普通 C# 类，Initialize/Tick/Dispose
 │   ├── NetworkClient.cs
 │   ├── PacketReader.cs
 │   ├── PacketWriter.cs
 │   ├── MessageDispatcher.cs
 │   └── ServerPacket.cs
+├── UI/                             # UI 层（已实现）
+│   ├── UIManager.cs
+│   ├── RoomUIBuilder.cs
+│   └── RoomUIController.cs
 ├── ECS/
 │   ├── Core/                       # ECS 框架内核
 │   │   ├── IComponent.cs           # 组件标记接口

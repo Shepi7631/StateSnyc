@@ -128,13 +128,7 @@ RoomAlreadyJoined → "已在房间中"
 
 ---
 
-## NetworkManager / NetworkClient
-
-`NetworkManager` 是普通 C# 类，通过 `Initialize()` 创建 `NetworkClient` 和 `MessageDispatcher`，通过 `Tick()` 在主线程分发收到的包。
-
-`NetworkClient` 在独立后台线程中运行 `ReceiveLoop`，收到的 `ServerPacket` 入队，由主线程 `TryDequeue` 消费，避免跨线程访问 Unity API。
-
-### 连接错误处理
+## 连接错误处理
 
 | 异常类型 | 处理位置 | 行为 |
 |---|---|---|
@@ -144,7 +138,9 @@ RoomAlreadyJoined → "已在房间中"
 | `IOException` | 同上 | 同上 |
 | `EndOfStreamException` | 同上 | 正常断线日志 |
 
-`InvalidDataException` 通常在客户端连接到非 StateSync TCP 服务（如 HTTP 服务器）时触发，对应现象：`Invalid payload length: 825110831`（HTTP/1.1 响应头的 ASCII 字节被误读为帧长度）。
+`InvalidDataException` 通常在连接到非 StateSync TCP 服务（如 HTTP 服务器）时触发，现象：`Invalid payload length: 825110831`（HTTP/1.1 响应头的 ASCII 字节被误读为帧长度）。
+
+NetworkManager / NetworkClient 的详细设计见 [client-architecture.md](client-architecture.md)。
 
 ---
 
