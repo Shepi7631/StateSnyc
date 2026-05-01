@@ -44,5 +44,17 @@ namespace Pathfinding.Tests.Geometry
             Assert.Equal(4f, result.X);
             Assert.Equal(6f, result.Z);
         }
+
+        [Fact]
+        public void Equals_SameComponents_ReturnsTrue()
+        {
+            Assert.Equal(new Vec2(1f, 2f), new Vec2(1f, 2f));
+        }
+
+        [Fact]
+        public void Equals_DifferentComponents_ReturnsFalse()
+        {
+            Assert.NotEqual(new Vec2(1f, 2f), new Vec2(1f, 3f));
+        }
     }
 }

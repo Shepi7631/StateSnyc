@@ -19,6 +19,8 @@ namespace Pathfinding.Geometry
         public static Vec2 operator +(Vec2 a, Vec2 b) => new Vec2(a.X + b.X, a.Z + b.Z);
         public static Vec2 operator -(Vec2 a, Vec2 b) => new Vec2(a.X - b.X, a.Z - b.Z);
         public static Vec2 operator *(Vec2 v, float s) => new Vec2(v.X * s, v.Z * s);
+        public static bool operator ==(Vec2 a, Vec2 b) => a.Equals(b);
+        public static bool operator !=(Vec2 a, Vec2 b) => !a.Equals(b);
 
         public bool Equals(Vec2 other) => X == other.X && Z == other.Z;
         public override bool Equals(object? obj) => obj is Vec2 other && Equals(other);
