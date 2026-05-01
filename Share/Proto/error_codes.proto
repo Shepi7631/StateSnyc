@@ -1,0 +1,13 @@
+syntax = "proto3";
+option csharp_namespace = "StateSync.Shared";
+
+enum ErrorCode {
+    SUCCESS = 0;
+    ROOM_NOT_FOUND = 100;
+    ROOM_FULL = 101;
+    ROOM_ALREADY_JOINED = 102;
+    INVALID_MAX_PLAYERS = 103;
+    PLAYER_NOT_IN_ROOM = 200;
+    GAME_NOT_STARTED = 300;
+    INVALID_INPUT = 301;
+}

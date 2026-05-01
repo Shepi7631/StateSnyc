@@ -1,0 +1,18 @@
+syntax = "proto3";
+option csharp_namespace = "StateSync.Shared";
+
+message JoinRoom {
+    string room_id = 1;
+    string player_id = 2;
+    repeated string player_ids = 3;
+}
+
+message PlayerJoined {
+    string player_id = 1;
+    string room_id = 2;
+}
+
+message CreateRoom {
+    int32 max_players = 1;
+    string room_id = 2;
+}

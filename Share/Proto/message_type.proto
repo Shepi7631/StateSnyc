@@ -1,0 +1,12 @@
+syntax = "proto3";
+option csharp_namespace = "StateSync.Shared";
+
+enum MessageType {
+    UNSPECIFIED = 0;
+    JOIN_ROOM = 1;
+    LEAVE_ROOM = 2;
+    PLAYER_JOINED = 3;
+    PLAYER_INPUT = 4;
+    WORLD_STATE = 5;
+    CREATE_ROOM = 6;
+}
