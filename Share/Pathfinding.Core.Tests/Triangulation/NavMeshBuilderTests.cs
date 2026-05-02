@@ -54,5 +54,19 @@ namespace Pathfinding.Tests.Triangulation
             int idx = mesh.FindTriangle(new Vec2(15f, 15f));
             Assert.Equal(-1, idx);
         }
+
+        [Fact]
+        public void Build_Rectangle_AdjacentTrianglesShareNeighborSlot()
+        {
+            var mesh = NavMeshBuilder.Build(Square);
+
+            Assert.Equal(2, mesh.Triangles.Count);
+            var t0 = mesh.Triangles[0];
+            var t1 = mesh.Triangles[1];
+            bool t0HasT1 = t0.N0 == 1 || t0.N1 == 1 || t0.N2 == 1;
+            bool t1HasT0 = t1.N0 == 0 || t1.N1 == 0 || t1.N2 == 0;
+            Assert.True(t0HasT1, "Triangle 0 should neighbour triangle 1");
+            Assert.True(t1HasT0, "Triangle 1 should neighbour triangle 0");
+        }
     }
 }

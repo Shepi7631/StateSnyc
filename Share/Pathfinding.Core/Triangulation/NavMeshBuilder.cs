@@ -11,7 +11,7 @@ namespace Pathfinding.Triangulation
 {
     public static class NavMeshBuilder
     {
-        public static NavMesh2D Build(NavPolygon boundary, IEnumerable<NavPolygon> obstacles = null)
+        public static NavMesh2D Build(NavPolygon boundary, IEnumerable<NavPolygon>? obstacles = null)
         {
             var input = new TNetPolygon();
 
@@ -68,9 +68,9 @@ namespace Pathfinding.Triangulation
                 int nbId1 = t.GetNeighborID(1);
                 int nbId2 = t.GetNeighborID(2);
 
-                int n0 = nbId0 >= 0 ? triIndex[nbId0] : -1;
-                int n1 = nbId1 >= 0 ? triIndex[nbId1] : -1;
-                int n2 = nbId2 >= 0 ? triIndex[nbId2] : -1;
+                int n0 = (nbId0 >= 0 && triIndex.TryGetValue(nbId0, out int mapped0)) ? mapped0 : -1;
+                int n1 = (nbId1 >= 0 && triIndex.TryGetValue(nbId1, out int mapped1)) ? mapped1 : -1;
+                int n2 = (nbId2 >= 0 && triIndex.TryGetValue(nbId2, out int mapped2)) ? mapped2 : -1;
 
                 triangles.Add(new Pathfinding.Geometry.NavTriangle(i, v0, v1, v2, n0, n1, n2));
             }
