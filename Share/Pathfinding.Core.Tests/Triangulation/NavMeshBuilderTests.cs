@@ -68,5 +68,41 @@ namespace Pathfinding.Tests.Triangulation
             Assert.True(t0HasT1, "Triangle 0 should neighbour triangle 1");
             Assert.True(t1HasT0, "Triangle 1 should neighbour triangle 0");
         }
+
+        private static readonly Polygon InnerSquare = new Polygon(new[]
+        {
+            new Vec2(3f, 3f),
+            new Vec2(7f, 3f),
+            new Vec2(7f, 7f),
+            new Vec2(3f, 7f),
+        });
+
+        [Fact]
+        public void Build_WithHole_ProducesTriangles()
+        {
+            var mesh = NavMeshBuilder.Build(Square, new[] { InnerSquare });
+
+            Assert.True(mesh.Triangles.Count > 0);
+        }
+
+        [Fact]
+        public void Build_WithHole_HoleCenterNotInAnyTriangle()
+        {
+            var mesh = NavMeshBuilder.Build(Square, new[] { InnerSquare });
+
+            // Centroid of hole (3,3)-(7,7) = (5,5)
+            int idx = mesh.FindTriangle(new Vec2(5f, 5f));
+            Assert.Equal(-1, idx);
+        }
+
+        [Fact]
+        public void Build_WithHole_CornerOutsideHoleIsInMesh()
+        {
+            var mesh = NavMeshBuilder.Build(Square, new[] { InnerSquare });
+
+            // (1,1) is inside Square but outside the hole
+            int idx = mesh.FindTriangle(new Vec2(1f, 1f));
+            Assert.True(idx >= 0, "Point outside hole should be in a triangle");
+        }
     }
 }
