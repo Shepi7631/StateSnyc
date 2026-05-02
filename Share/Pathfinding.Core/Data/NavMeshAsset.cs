@@ -32,14 +32,17 @@ namespace Pathfinding.Data
         public Polygon GetBoundary() =>
             new Polygon(Boundary.Select(v => new Vec2(v[0], v[1])));
 
-        public IEnumerable<Polygon> GetObstacles() =>
-            Obstacles.Select(obs => new Polygon(obs.Select(v => new Vec2(v[0], v[1]))));
+        public IReadOnlyList<Polygon> GetObstacles() =>
+            Obstacles.Select(obs => new Polygon(obs.Select(v => new Vec2(v[0], v[1])))).ToList();
 
         public NavMesh2D Build() =>
             NavMeshBuilder.Build(GetBoundary(), GetObstacles());
 
+        private static readonly JsonSerializerOptions s_jsonOptions =
+            new JsonSerializerOptions { WriteIndented = true };
+
         public string ToJson() =>
-            JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
+            JsonSerializer.Serialize(this, s_jsonOptions);
 
         public static NavMeshAsset Load(string json) =>
             JsonSerializer.Deserialize<NavMeshAsset>(json)
