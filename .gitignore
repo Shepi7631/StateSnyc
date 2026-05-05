@@ -23,6 +23,10 @@ Client/UserSettings/
 # Claude Code
 .claude/
 
+# Test output
+test_out.log
+test_output.txt
+
 # OS
 .DS_Store
 Thumbs.db
