@@ -1,0 +1,16 @@
+{
+  "name": "Pathfinding.Core",
+  "rootNamespace": "Pathfinding",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "Triangle.dll",
+    "System.Text.Json.dll"
+  ],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "noEngineReferences": true
+}

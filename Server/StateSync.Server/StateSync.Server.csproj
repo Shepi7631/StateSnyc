@@ -20,4 +20,8 @@
     <Protobuf Include="../../Proto/**/*.proto" GrpcServices="None" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Share\Pathfinding.Core\Pathfinding.Core.csproj" />
+  </ItemGroup>
+
 </Project>

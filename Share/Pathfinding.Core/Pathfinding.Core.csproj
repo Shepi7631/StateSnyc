@@ -5,6 +5,7 @@
     <LangVersion>9.0</LangVersion>
     <RootNamespace>Pathfinding</RootNamespace>
     <AssemblyName>Pathfinding.Core</AssemblyName>
+    <BaseOutputPath>bin~</BaseOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Unofficial.Triangle.NET" Version="0.0.1" />
