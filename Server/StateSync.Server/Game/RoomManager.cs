@@ -1,15 +1,25 @@
 namespace StateSync.Server.Game;
 
 using System.Collections.Concurrent;
+using Pathfinding.Data;
 using StateSync.Shared;
 
 public class RoomManager
 {
     private const int MaxAllowedPlayers = 16;
     private readonly ConcurrentDictionary<string, Room> _rooms = new();
+    private readonly NavMesh2D _navMesh;
+
+    public RoomManager(NavMesh2D navMesh)
+    {
+        _navMesh = navMesh;
+    }
 
     public void CreateRoom(string roomId, int maxPlayers = 16) =>
-        _rooms[roomId] = new Room(roomId, maxPlayers);
+        _rooms[roomId] = new Room(roomId, maxPlayers, _navMesh);
+
+    public Room? GetRoom(string roomId) =>
+        _rooms.GetValueOrDefault(roomId);
 
     public (ErrorCode Error, int[] ErrorParams, JoinRoom? Response) HandleJoinRoom(string roomId)
     {
@@ -31,20 +41,20 @@ public class RoomManager
             return (ErrorCode.InvalidMaxPlayers, [], null);
 
         var roomId = GenerateUniqueRoomId();
-        _rooms[roomId] = new Room(roomId, maxPlayers);
+        _rooms[roomId] = new Room(roomId, maxPlayers, _navMesh);
 
         return (ErrorCode.Success, [], new CreateRoom { RoomId = roomId });
     }
 
+    public IReadOnlyCollection<Room> GetAllRooms() => (IReadOnlyCollection<Room>)_rooms.Values;
+
     private string GenerateUniqueRoomId()
     {
-        // Random.Shared 是线程安全的静态实例，无需 lock
         for (int i = 0; i < 10; i++)
         {
             var id = Random.Shared.Next(0, 1_000_000).ToString("D6");
             if (!_rooms.ContainsKey(id)) return id;
         }
-        // 10 次碰撞后回退到 GUID 前缀，在百万房间规模内实际上不可能触发
         return Guid.NewGuid().ToString("N")[..6];
     }
 }

@@ -1,15 +1,27 @@
 namespace StateSync.Server.Tests.Game;
 
-using Xunit;
+using Pathfinding.Data;
 using StateSync.Server.Game;
 using StateSync.Shared;
+using Xunit;
 
 public class RoomManagerTests
 {
-    private readonly RoomManager _manager = new();
+    private readonly RoomManager _manager;
 
     public RoomManagerTests()
     {
+        var vertices = new Vec2[]
+        {
+            new(0f, 0f), new(10f, 0f), new(10f, 10f), new(0f, 10f)
+        };
+        var triangles = new NavTriangle[]
+        {
+            new(0, 0, 1, 2, 1, -1, -1),
+            new(1, 0, 2, 3, -1, -1, 0)
+        };
+        var mesh = new NavMesh2D(vertices, triangles);
+        _manager = new RoomManager(mesh);
         _manager.CreateRoom("room1", maxPlayers: 2);
     }
 

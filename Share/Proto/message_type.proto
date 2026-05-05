@@ -9,4 +9,9 @@ enum MessageType {
     PLAYER_INPUT = 4;
     WORLD_STATE = 5;
     CREATE_ROOM = 6;
+    MOVE_REQUEST = 7;
+    MOVE_EVENT = 8;
+    POSITION_SYNC = 9;
+    PING = 10;
+    PONG = 11;
 }

@@ -24,11 +24,12 @@ namespace StateSync.Shared {
     static MessageTypeReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChJtZXNzYWdlX3R5cGUucHJvdG8qhAEKC01lc3NhZ2VUeXBlEg8KC1VOU1BF",
+            "ChJtZXNzYWdlX3R5cGUucHJvdG8qzQEKC01lc3NhZ2VUeXBlEg8KC1VOU1BF",
             "Q0lGSUVEEAASDQoJSk9JTl9ST09NEAESDgoKTEVBVkVfUk9PTRACEhEKDVBM",
             "QVlFUl9KT0lORUQQAxIQCgxQTEFZRVJfSU5QVVQQBBIPCgtXT1JMRF9TVEFU",
-            "RRAFEg8KC0NSRUFURV9ST09NEAZCE6oCEFN0YXRlU3luYy5TaGFyZWRiBnBy",
-            "b3RvMw=="));
+            "RRAFEg8KC0NSRUFURV9ST09NEAYSEAoMTU9WRV9SRVFVRVNUEAcSDgoKTU9W",
+            "RV9FVkVOVBAIEhEKDVBPU0lUSU9OX1NZTkMQCRIICgRQSU5HEAoSCAoEUE9O",
+            "RxALQhOqAhBTdGF0ZVN5bmMuU2hhcmVkYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::StateSync.Shared.MessageType), }, null, null));
@@ -45,6 +46,11 @@ namespace StateSync.Shared {
     [pbr::OriginalName("PLAYER_INPUT")] PlayerInput = 4,
     [pbr::OriginalName("WORLD_STATE")] WorldState = 5,
     [pbr::OriginalName("CREATE_ROOM")] CreateRoom = 6,
+    [pbr::OriginalName("MOVE_REQUEST")] MoveRequest = 7,
+    [pbr::OriginalName("MOVE_EVENT")] MoveEvent = 8,
+    [pbr::OriginalName("POSITION_SYNC")] PositionSync = 9,
+    [pbr::OriginalName("PING")] Ping = 10,
+    [pbr::OriginalName("PONG")] Pong = 11,
   }
 
   #endregion

@@ -56,5 +56,23 @@ namespace Pathfinding.Tests.Data
         {
             Assert.NotEqual(new Vec2(1f, 2f), new Vec2(1f, 3f));
         }
+
+        [Fact]
+        public void Normalized_UnitVector_ReturnsSameDirection()
+        {
+            var v = new Vec2(3f, 4f);
+            var n = v.Normalized();
+            Assert.Equal(0.6f, n.X, precision: 5);
+            Assert.Equal(0.8f, n.Z, precision: 5);
+        }
+
+        [Fact]
+        public void Normalized_ZeroVector_ReturnsZero()
+        {
+            var v = new Vec2(0f, 0f);
+            var n = v.Normalized();
+            Assert.Equal(0f, n.X);
+            Assert.Equal(0f, n.Z);
+        }
     }
 }

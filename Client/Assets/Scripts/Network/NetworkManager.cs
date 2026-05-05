@@ -11,6 +11,8 @@ namespace StateSync.Client.Network
         private bool _NotifyDisconnectOnMainThread;
         private bool _Initialized;
 
+        public RttTracker Rtt { get; private set; }
+
         public bool IsConnected
         {
             get { return _Client != null && _Client.IsConnected; }
@@ -28,6 +30,8 @@ namespace StateSync.Client.Network
             _Dispatcher = new MessageDispatcher();
             _Client.OnDisconnected += HandleDisconnected;
             _Initialized = true;
+            Rtt = new RttTracker();
+            _Dispatcher.Register<Ping>(MessageType.Ping, HandlePing);
         }
 
         public void Tick()
@@ -62,6 +66,7 @@ namespace StateSync.Client.Network
             _Dispatcher?.Clear();
             _Client = null;
             _Dispatcher = null;
+            Rtt = null;
             _NotifyDisconnectOnMainThread = false;
             _Initialized = false;
         }
@@ -102,6 +107,17 @@ namespace StateSync.Client.Network
         private void HandleDisconnected()
         {
             _NotifyDisconnectOnMainThread = true;
+        }
+
+        private void HandlePing(Ping ping, ErrorCode error, int[] errorParams)
+        {
+            Send(MessageType.Pong, new Pong
+            {
+                ServerTimestamp = ping.ServerTimestamp,
+                Sequence = ping.Sequence
+            });
+
+            Rtt.UpdateRtt((int)ping.YourRttMs);
         }
 
         private void EnsureInitialized()

@@ -16,6 +16,13 @@ namespace Pathfinding.Data
             return MathF.Sqrt(dx * dx + dz * dz);
         }
 
+        public Vec2 Normalized()
+        {
+            float len = MathF.Sqrt(X * X + Z * Z);
+            if (len == 0f) return new Vec2(0f, 0f);
+            return new Vec2(X / len, Z / len);
+        }
+
         public static Vec2 operator +(Vec2 a, Vec2 b) => new Vec2(a.X + b.X, a.Z + b.Z);
         public static Vec2 operator -(Vec2 a, Vec2 b) => new Vec2(a.X - b.X, a.Z - b.Z);
         public static Vec2 operator *(Vec2 v, float s) => new Vec2(v.X * s, v.Z * s);

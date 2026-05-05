@@ -75,18 +75,14 @@
     <Compile Include="Assets\Scripts\Network\PacketWriter.cs" />
     <Compile Include="Assets\Scripts\_gen\ErrorCodes.cs" />
     <Compile Include="Assets\Scripts\Network\MessageDispatcher.cs" />
-    <Compile Include="Assets\Pathfinding.Core\Algorithm\FunnelSolver.cs" />
-    <Compile Include="Assets\Pathfinding.Core\Data\NavMesh2D.cs" />
-    <Compile Include="Assets\Pathfinding.Core\Data\Polygon.cs" />
     <Compile Include="Assets\Scripts\NavMeshDemo\NavMeshJsonLoader.cs" />
-    <Compile Include="Assets\Pathfinding.Core\Algorithm\NavMeshBuilder.cs" />
-    <Compile Include="Assets\Pathfinding.Core\Data\NavTriangle.cs" />
     <Compile Include="Assets\Scripts\NavMeshDemo\NavMeshRenderer.cs" />
-    <Compile Include="Assets\Pathfinding.Core\Algorithm\AStarSolver.cs" />
-    <Compile Include="Assets\Pathfinding.Core\Data\Vec2.cs" />
-    <Compile Include="Assets\Pathfinding.Core\Data\Portal.cs" />
     <Compile Include="Assets\Scripts\NavMeshDemo\PathOverlayRenderer.cs" />
     <Compile Include="Assets\Scripts\NavMeshDemo\NavMeshDemoController.cs" />
+    <Compile Include="Assets\Scripts\Movement\RemotePlayerController.cs" />
+    <Compile Include="Assets\Scripts\Movement\LocalPlayerController.cs" />
+    <Compile Include="Assets\Scripts\Movement\MovementManager.cs" />
+    <Compile Include="Assets\Scripts\Network\RttTracker.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -443,6 +439,18 @@
     </Reference>
     <Reference Include="Triangle">
       <HintPath>Assets\Plugins\Triangle.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Text.Json">
+      <HintPath>Assets\Plugins\System.Text.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Bcl.AsyncInterfaces">
+      <HintPath>Assets\Plugins\Microsoft.Bcl.AsyncInterfaces.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Text.Encodings.Web">
+      <HintPath>Assets\Plugins\System.Text.Encodings.Web.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="netstandard">
@@ -1035,6 +1043,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Pathfinding.Core.csproj" />
   </ItemGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <ItemGroup>
