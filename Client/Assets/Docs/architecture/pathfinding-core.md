@@ -28,17 +28,20 @@ StateSnyc/
 
 ```
 Pathfinding.Core/
-├── Geometry/
-│   ├── Vec2.cs          — 轻量 2D 点 (float X, float Z)，无 UnityEngine 依赖
-│   ├── Polygon.cs       — 有序顶点列表，表示边界或障碍物轮廓
-│   ├── NavTriangle.cs   — 三角形：3 个顶点索引 + 3 个邻居三角形索引
-│   └── Portal.cs        — 两个相邻三角形的共享边（漏斗入口）
-├── Triangulation/
-│   ├── NavMeshBuilder.cs — Triangle.NET CDT 封装，输入多边形 → NavMesh2D
-│   └── NavMesh2D.cs      — 运行时网格：顶点数组 + 三角形数组 + FindTriangle()
-└── Data/
-    └── NavMeshAsset.cs   — JSON 序列化/反序列化 + Build() 入口
+├── Data/                    — 数据层（所有类型命名空间 Pathfinding.Data）
+│   ├── Vec2.cs              — 轻量 2D 点 (float X, float Z)，无 UnityEngine 依赖
+│   ├── Polygon.cs           — 有序顶点列表，表示边界或障碍物轮廓
+│   ├── NavTriangle.cs       — 三角形：3 个顶点索引 + 3 个邻居三角形索引
+│   ├── Portal.cs            — 两个相邻三角形的共享边（漏斗入口）
+│   ├── NavMesh2D.cs         — 运行时网格容器：顶点数组 + 三角形数组 + FindTriangle()
+│   └── NavMeshAsset.cs      — 输入多边形的 JSON 序列化/反序列化 + Build() facade
+└── Algorithm/               — 对外可调用的算法（命名空间 Pathfinding.Algorithm）
+    ├── NavMeshBuilder.cs    — Triangle.NET CDT 封装，输入多边形 → NavMesh2D
+    ├── AStarSolver.cs       — 三角形对偶图 A\*，输出三角走廊（含 private MinHeap）
+    └── FunnelSolver.cs      — Simple Stupid Funnel，三角走廊 + start/goal → 最短折线
 ```
+
+**分层原则：** `Data/` 存"是什么"（类型、容器、持久化契约），`Algorithm/` 存"能做什么"（构造 + 查询算法）。两者都可能包含算法代码（CDT、A\*、点定位都是算法），真正的边界是"网格生命周期角色"：`Data/` 是网格的表示与载入，`Algorithm/` 是消费网格生成结果的流程。
 
 ---
 
@@ -161,6 +164,56 @@ Polygon (boundary + obstacles)
 
 ---
 
+### `AStarSolver` — 三角形对偶图 A\*
+
+```csharp
+public static class AStarSolver
+{
+    public static IReadOnlyList<int>? Solve(NavMesh2D mesh, Vec2 start, Vec2 goal);
+}
+```
+
+**语义：**
+
+| 情况 | 返回值 |
+|---|---|
+| `start` 或 `goal` 不在网格内 | `null` |
+| `start` 与 `goal` 落在同一三角形 | 单元素列表 `[triIdx]` |
+| 两端连通 | 从起点三角形到终点三角形的索引序列，相邻元素互为邻居 |
+| 两端不连通 | `null` |
+
+**代价与启发：** 三角形质心之间的欧氏距离。Funnel 阶段会重算真实最短距离，A\* 的质心估值偏差在此处被吸收。
+
+**实现要点：** 并行数组（`float[] gScore`、`int[] cameFrom`、`bool[] closed`）按三角形索引访问；内部私有 `MinHeap` 使用惰性失效策略处理 decrease-key。
+
+---
+
+### `FunnelSolver` — Simple Stupid Funnel
+
+```csharp
+public static class FunnelSolver
+{
+    public static IReadOnlyList<Vec2> Solve(
+        NavMesh2D mesh,
+        IReadOnlyList<int> corridor,
+        Vec2 start,
+        Vec2 goal);
+}
+```
+
+**输入**：A\* 生成的三角走廊 + 起止点。**输出**：沿走廊的最短折线路径，首尾分别为 `start` 和 `goal`。
+
+**算法**：Mikko Mononen 的 Simple Stupid Funnel。复杂度 O(n) portal 数。
+
+**Portal 朝向**：根据相邻三角形的共享边与 CCW 绕向，运行时推导 Left/Right 相对走路方向。不依赖 `NavTriangle.GetPortal` 的预置 Left/Right 标签。
+
+**边界情况**：
+- 走廊只有一个三角形 → 返回 `[start, goal]`
+- 无障碍直线可达 → 返回 `[start, goal]`（中间无拐点）
+- 所有拐点一定是某个 `NavTriangle` 顶点（"漏斗收缩落在 portal 端点"），不会产生新几何
+
+---
+
 ### `NavMeshAsset` — JSON 序列化
 
 ```csharp
@@ -242,6 +295,4 @@ if (triIdx >= 0)
 
 | 模块 | 位置 | 说明 |
 |---|---|---|
-| `AStarSolver` | `Triangulation/` | A\* 在三角形对偶图上寻路，输出三角走廊 |
-| `FunnelAlgorithm` | `Algorithm/` | 漏斗算法，将三角走廊 + Portal 序列转为最短折线路径 |
 | `LosChecker` | `Algorithm/` | 可选后处理，合并共线路段 |

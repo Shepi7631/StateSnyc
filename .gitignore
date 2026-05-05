@@ -1,8 +1,13 @@
 # .NET build output
 bin/
+bin~/
 obj/
+obj~/
+bin.meta
+obj.meta
 *.user
 *.lscache
+*.lscache.meta
 *.suo
 .vs/
 

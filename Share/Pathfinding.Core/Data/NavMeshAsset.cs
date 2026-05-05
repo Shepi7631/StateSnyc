@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Pathfinding.Geometry;
-using Pathfinding.Triangulation;
+using Pathfinding.Algorithm;
 
 namespace Pathfinding.Data
 {

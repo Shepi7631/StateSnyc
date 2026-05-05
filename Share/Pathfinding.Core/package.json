@@ -1,0 +1,7 @@
+{
+  "name": "com.statesync.pathfinding-core",
+  "version": "1.0.0",
+  "displayName": "Pathfinding Core",
+  "description": "A* and Funnel algorithms for NavMesh pathfinding",
+  "unity": "2021.3"
+}
